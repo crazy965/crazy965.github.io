@@ -1,0 +1,992 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="crazy965">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="发现的写比较好的博客文章，备份到本地， 原文地址 l0neman.github.io   前言编写此文档的用意： 作为 Android NDK 项目开发的参考手册。  1. 千年编写此文档的用意： 作为 Android NDK 项目开发的参考手册。 对于 NDK 工程的搭建可参考 Android NDK 指南 2. JNI简介JNI（Java Native Interface，Java 原生接口">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android JNI指南">
+<meta property="og:url" content="http://crazy965.github.io/2025/01/15/Android-JNI%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="发现的写比较好的博客文章，备份到本地， 原文地址 l0neman.github.io   前言编写此文档的用意： 作为 Android NDK 项目开发的参考手册。  1. 千年编写此文档的用意： 作为 Android NDK 项目开发的参考手册。 对于 NDK 工程的搭建可参考 Android NDK 指南 2. JNI简介JNI（Java Native Interface，Java 原生接口">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-01-15T15:20:39.000Z">
+<meta property="article:modified_time" content="2025-01-15T13:14:55.236Z">
+<meta property="article:author" content="crazy965">
+<meta property="article:tag" content="JNI">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Android JNI指南 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"crazy965.github.io","root":"/","version":"1.9.8","typing":{"enable":false,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>crazy965&#39;s blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/bg/%E9%BE%99%E7%8F%A0%E5%9B%9B%E6%98%9F%E7%90%83.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle">Android JNI指南</span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-01-15 15:20" pubdate>
+          2025年1月15日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          9.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          76 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Android JNI指南</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <blockquote>
+<p>发现的写比较好的博客文章，备份到本地， 原文地址 <a target="_blank" rel="noopener" href="https://l0neman.github.io/2020/07/14/android-jni-%E6%8C%87%E5%8D%97/#JNI-%E6%96%B9%E6%B3%95%E6%B3%A8%E5%86%8C">l0neman.github.io</a></p>
+</blockquote>
+<blockquote>
+<p>前言编写此文档的用意： 作为 Android NDK 项目开发的参考手册。</p>
+</blockquote>
+<h2 id="1-千年"><a href="#1-千年" class="headerlink" title="1. 千年"></a>1. 千年</h2><p>编写此文档的用意：</p>
+<p>作为 Android NDK 项目开发的参考手册。</p>
+<p>对于 NDK 工程的搭建可参考 <a target="_blank" rel="noopener" href="https://l0neman.github.io/2020/07/14/android-ndk-%E6%8C%87%E5%8D%97/">Android NDK 指南</a></p>
+<h2 id="2-JNI简介"><a href="#2-JNI简介" class="headerlink" title="2. JNI简介"></a>2. JNI简介</h2><p>JNI（Java Native Interface，Java 原生接口），是 Java 和 C++ 组件用以互相通信的接口。</p>
+<p>Android 平台下的 JNI 支持由 Android NDK 提供，它是一套能将 C 或 C++（原生代码）嵌入到 Android 应用中的工具。</p>
+<h2 id="3-JNI优化原则"><a href="#3-JNI优化原则" class="headerlink" title="3. JNI优化原则"></a>3. JNI优化原则</h2><p>为什么要使用 JNI 在 Android 平台下进行编程：</p>
+<ol>
+<li><p>在平台之间移植应用；</p>
+</li>
+<li><p>重复使用现有库，或者提供自己的库供重复使用；</p>
+</li>
+<li><p>在某些情况下提供高性能，特别是像游戏这种计算密集型应用；</p>
+</li>
+<li><p>提供安全性保障，在二进制层面比字节码层面的逆向工作更加困难。</p>
+</li>
+<li><p>尽可能减少跨 JNI 层的编组（Marshalling）数据资源的次数，因为跨 JNI 层进行编组的开销很大。尽可能设计一种接口，减少需要编组的数据量以及必须进行数据编组的频率；</p>
+</li>
+<li><p>尽量避免在使用受管理的编程语言（在虚拟机中运行）中与 C&#x2F;C++ 编写的代码之间进行异步通信（例如 C&#x2F;C++ 中开启线程后直接回调 Java 语言），这样可以使 JNI 接口更容易维护。通常使用与编写界面的相同语言进行异步更新，以简化异步界面的更新，例如，使用 Java 语言创建线程，然后发出对 C++ 层的阻塞调用，然后在阻塞完成后通知界面线程；</p>
+</li>
+<li><p>尽可能减少需要访问 JNI 或被 JNI 访问的线程数。如果确实需要以 Java 和 C++ 两种语言来利用线程池，请尝试在池所有者之间（而不是各个工作线程之间）保持 JNI 通信；</p>
+</li>
+<li><p>将接口保存在少量的容易识别的 C++ 和 Java 源位置，以便于将来进行重构。</p>
+</li>
+</ol>
+<h2 id="4-名词说明"><a href="#4-名词说明" class="headerlink" title="4. 名词说明"></a>4. 名词说明</h2><p>下文叙述中使用到的名词说明：</p>
+<ul>
+<li><p>JNI 方法，在 Java 层使用 native 声明，使用 C&#x2F;C++ 中实现的方法。</p>
+</li>
+<li><p>JNI 函数，JNI 提供的与 Java 层交互的工具一系列函数，例如 <code>RegisterNatives</code>。</p>
+</li>
+<li><p>不透明，具体结构未知，由具体的虚拟机实现决定。</p>
+</li>
+</ul>
+<h2 id="5-JavaVM-和JNIEnv"><a href="#5-JavaVM-和JNIEnv" class="headerlink" title="5. JavaVM 和JNIEnv"></a>5. JavaVM 和JNIEnv</h2><p>JNI 定义了两个关键的数据结构，<code>JavaVM</code> 和 <code>JNIEnv</code>，它们的本质都是指向函数表的二级指针（在 C++ 版本中，两者都是类，类中都有一个指向函数表的指针，它们的成员函数封装了通过函数表进行访问的 JNI 函数），可以使用 <code>JavaVM</code> 类进行创建和销毁 JavaVM 的操作。理论上，每个进程可以有多个 JavaVM，但 Android 只允许有一个。</p>
+<p><code>JNIEnv</code> 的指针将在每个 JNI 函数的第一个参数中。</p>
+<p>这个 <code>JNIEnv</code> 只能用于线程本地存储（Thread Local），所以无法在线程之间共享 <code>JNIEnv</code>，如果需要在其他线程中访问 <code>JNIEnv</code>，可以通过 <code>JavaVM</code> 调用 <code>GetEnv</code> 函数获得相应的 <code>JNIEnv</code> 指针（需要在之前使用过 <code>AttachCurrentThread</code> 对此线程进行附加后调用）。</p>
+<p><code>JavaVM</code> 指针是全局的，可以在线程之间共享，通过保存 <code>JavaVM</code> 用于在其他线程中获取 <code>JNIEnv</code>。</p>
+<p><code>JNIEnv</code> 和 <code>JavaVM</code> 在 C 源文件和 C++ 源文件中的声明不同，使用 C 文件和 C++ 文件包含 <code>jni.h</code> 时，会有不同的类型定义。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">if</span> defined(__cplusplus)</span><br><span class="hljs-keyword">typedef</span> _JNIEnv JNIEnv;<br><span class="hljs-keyword">typedef</span> _JavaVM JavaVM;<br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br><span class="hljs-keyword">typedef</span> <span class="hljs-type">const</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">JNINativeInterface</span>* JNIEnv;<br><span class="hljs-keyword">typedef</span> <span class="hljs-type">const</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">JNIInvokeInterface</span>* JavaVM;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
+
+<p>因此，不建议同时在这两种语言包含的头文件中添加 <code>JNIEnv</code> 参数（容易导致混乱）。或者当源文件中出现 <code>#ifdef __cplusplus</code> ，且该文件中所有的内容都引用了 <code>JNIEnv</code> 时，那么可能需要做额外的处理。</p>
+<p>JNI 方法是 Java 代码与 C&#x2F;C++ 代码沟通的桥梁，使用它时必须首先注册。JNI 方法的声明在 Java 类中，实现在 C&#x2F;C++ 代码中，在 Java 层的方法声明前面必须添加 <code>native</code> 关键字，然后才能进行注册。</p>
+<p>注册方式分为静态注册（根据 JNI 命令规范直接定义对应名字的 C&#x2F;C++ 函数）和动态注册（使用 <code>RegisterNatives</code> 函数注册到 C&#x2F;C++ 函数上）两种方式。</p>
+<p>例如，Java 声明了如下 JNI 方法：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">NativeHandler</span> &#123;<br><br>  <span class="hljs-type">static</span> &#123;<br>    System.<span class="hljs-built_in">loadLibrary</span>(<span class="hljs-string">&quot;hello&quot;</span>);<br>  &#125;<br><br>  <br>  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> native String <span class="hljs-title">getString</span><span class="hljs-params">()</span></span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>NDK 工程描述如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cpp">src/main/<br> |<br> +-- java<br> +-- jni<br>      |<br>      +-- Android.mk<br>      +-- Application.mk<br>      +-- hello.cpp<br>      +-- hello.h<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp">LOCAL_PATH := $(call my-dir)<br><br>include $(CLEAR_VARS)<br><br>LOCAL_MODULE    := hello<br>LOCAL_SRC_FILES := hello.cpp<br><br>include $(BUILD_SHARED_LIBRARY)<br></code></pre></td></tr></table></figure>
+
+<p>下面将针对上面搭建的 NDK 工程，采用两种方式在 C&#x2F;C++ 代码中实现 Java 类 <code>NativeHandler</code> 中的 <code>getString</code> 方法并注册。</p>
+<h2 id="6-JNI方法注册"><a href="#6-JNI方法注册" class="headerlink" title="6. JNI方法注册"></a>6. JNI方法注册</h2><h3 id="6-1-静态注册"><a href="#6-1-静态注册" class="headerlink" title="6.1  静态注册"></a>6.1  静态注册</h3><p>静态注册只需要按照 JNI 接口规范，在 C&#x2F;C++ 代码中声明一个 <code>Java_[全类名中 的 . 替换为 _]_[方法名]</code> 函数，然后添加 <code>JNIEXPORT</code> 前缀即可。</p>
+<p>当系统加载 so 文件后，将根据名字对应规则，自动注册 JNI 方法。</p>
+<p>下面采用了 C++ 代码描述，其中的函数需要使用 <code>extern &quot;C&quot;</code> 来包括（为了兼容 C 语言的符号签名规则，让 C 语言能够正常链接调用它）。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> NDKTPROJECT_MAIN_H</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> NDKTPROJECT_MAIN_H</span><br><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;jni.h&gt;</span></span><br><br><span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C&quot;</span> &#123;<br><span class="hljs-function">JNIEXPORT jstring JNICALL</span><br><span class="hljs-function"><span class="hljs-title">Java_io_l0neman_jniexample_NativeHandler_getString</span><span class="hljs-params">(JNIEnv *env, jclass clazz)</span></span>;<br>&#125;<br><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;main.h&quot;</span></span><br><br><span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C&quot;</span> &#123;<br><span class="hljs-function">jstring <span class="hljs-title">Java_io_l0neman_jniexample_NativeHandler_getString</span><span class="hljs-params">(JNIEnv *env, jclass clazz)</span> </span>&#123;<br>  <span class="hljs-keyword">return</span> env-&gt;<span class="hljs-built_in">NewStringUTF</span>(<span class="hljs-string">&quot;hello&quot;</span>);<br>&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>如果是 C 语言代码的实现，那么可以去除 <code>extern &quot;C&quot;</code> 的声明，且返回字符串的代码要改为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">return</span> (*env)-&gt;<span class="hljs-built_in">NewStringUTF</span>(env, <span class="hljs-string">&quot;hello&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>此时就注册完成了，Java 层可以直接调用 <code>textView.setText(NativeHandler.getString())</code> 进行测试了。</p>
+<p>这种注册方式简单直接，但是所有 C&#x2F;C++ 中实现的 JNI 函数符号都需要被导出，对于逆向人员来说，使用 IDA Pro 可以直接看到注册 JNI 方法的名字，快速定位到对应的 Java 代码。</p>
+<h3 id="6-2-动态注册"><a href="#6-2-动态注册" class="headerlink" title="6.2. 动态注册"></a>6.2. 动态注册</h3><p>动态注册与静态注册不同，它是用 <code>JNIEnv</code> 类型提供的 <code>registerNatives</code> 方法来将 JNI 方法动态绑定到指定的 C&#x2F;C++ 函数上。</p>
+<p>首先需要实现 JNI 提供的标准入口函数，<code>JNI_OnLoad</code>，它将会在调用 <code>System.loadLibrary(&quot;hello&quot;)</code> 后，由 Java 虚拟机进行回调，同时可以实现可选的 <code>JNI_OnUnload</code> 函数，用于虚拟机将动态库卸载时回收资源。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">JNIEXPORT jint <span class="hljs-title">JNI_OnLoad</span><span class="hljs-params">(JavaVM *vm, <span class="hljs-type">void</span> *reserved)</span> </span>&#123;<br>  <span class="hljs-keyword">return</span> JNI_VERSION_1_6;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>返回值表示要使用的 JNI 版本，返回低版本，将不能使用高版本提供的一些 JNI 函数，这里返回当前最高版本 <code>JNI_VERSION_1_6</code>，如果返回其它非版本数值，将导致加载 so 库失败。</p>
+<p>完整注册代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">static</span> <span class="hljs-type">const</span> <span class="hljs-type">char</span> *CLASS_NAME = <span class="hljs-string">&quot;io/l0neman/jniexample/NativeHandler&quot;</span>;<br><br><span class="hljs-function"><span class="hljs-type">static</span> jstring <span class="hljs-title">getString</span><span class="hljs-params">(JNIEnv *env, jclass nativeHandler)</span> </span>&#123;<br>  <span class="hljs-keyword">return</span> env-&gt;<span class="hljs-built_in">NewStringUTF</span>(<span class="hljs-string">&quot;hello&quot;</span>);<br>&#125;<br><br><span class="hljs-type">static</span> JNINativeMethod gMethods[] = &#123;<br>    &#123;<span class="hljs-string">&quot;getString&quot;</span>, <span class="hljs-string">&quot;()Ljava/lang/String;&quot;</span>, (<span class="hljs-type">void</span> *) getString&#125;,<br>&#125;;<br><br><span class="hljs-function">JNIEXPORT jint <span class="hljs-title">JNI_OnLoad</span><span class="hljs-params">(JavaVM *vm, <span class="hljs-type">void</span> *reserved)</span> </span>&#123;<br>  JNIEnv *env = <span class="hljs-literal">nullptr</span>;<br>  <span class="hljs-keyword">if</span> (vm-&gt;<span class="hljs-built_in">GetEnv</span>((<span class="hljs-type">void</span> **) &amp;env, JNI_VERSION_1_6) != JNI_OK) &#123;<br>    <span class="hljs-keyword">return</span> JNI_ERR;<br>  &#125;<br><br>  jclass nativeHandlerClass = env-&gt;<span class="hljs-built_in">FindClass</span>(CLASS_NAME);<br>  <span class="hljs-keyword">if</span> (nativeHandlerClass == <span class="hljs-literal">nullptr</span>) &#123;<br>    <span class="hljs-keyword">return</span> JNI_ERR;<br>  &#125;<br><br>  jint methods = <span class="hljs-built_in">sizeof</span>(gMethods) / <span class="hljs-built_in">sizeof</span>(JNINativeMethod);<br>  jint ret = env-&gt;<span class="hljs-built_in">RegisterNatives</span>(nativeHandlerClass, gMethods, methods);<br>  <span class="hljs-keyword">if</span> (ret != JNI_OK) &#123;<br>    <span class="hljs-keyword">return</span> ret;<br>  &#125;<br><br>  <span class="hljs-keyword">return</span> JNI_VERSION_1_6;<br>&#125;<br><br><span class="hljs-function">JNIEXPORT <span class="hljs-type">void</span> <span class="hljs-title">JNI_OnUnload</span><span class="hljs-params">(JavaVM *vm, <span class="hljs-type">void</span> *reserved)</span> </span>&#123;<br>  <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>从 <code>JNI_OnLoad</code> 开始看。</p>
+<ol>
+<li>首先 <code>RegisterNatives</code> 这个函数由 <code>JNIEnv</code> 类型提供，而 <code>JNI_OnLoad</code> 第一个参数是 <code>JavaVM *</code>，所以，这里首先获取 <code>JNIEnv</code> 类型指针，使用 <code>JavaVM</code> 的 <code>GetEnv</code> 函数获取（由于系统默认已经附加到线程，所以这里才能直接 <code>GetEnv</code>）;</li>
+<li>下面需要使用 <code>RegisterNatives</code> 注册 JNI 函数，看一下它的声明：</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">jint <span class="hljs-title">RegisterNatives</span><span class="hljs-params">(jclass clazz, <span class="hljs-type">const</span> JNINativeMethod* methods, jint nMethods)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>第 1 个参数是 JNI 方法所在的 Java 类，第 2 个是包含需要注册的 JNI 方法对应关系的数组，第 3 个是要注册的 JNI 方法数量或者说前面的数组大小。</p>
+<p>那么，就根据要求填充相关参数。</p>
+<ol start="3">
+<li>使用 <code>JNIEnv</code> 的 <code>FindClass</code> 来获得表示 <code>NativeHandler</code> 类型的 <code>jclass</code>，可以看到描述全类名的方法，将 <code>.</code> 替换为路径符号 <code>/</code> 即可，这样得到了第一个参数；</li>
+<li>定义一个 <code>JNINativeMethod</code> 的数组，每个 <code>JNINativeMethod</code> 都用于描述一个 JNI 方法的 Java 方法声明和 C&#x2F;C++ 函数的一对一关系。</li>
+</ol>
+<p><code>JNINativeMethod</code> 定义如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> &#123;<br>    <span class="hljs-type">const</span> <span class="hljs-type">char</span>* name;<br>    <span class="hljs-type">const</span> <span class="hljs-type">char</span>* signature;<br>    <span class="hljs-type">void</span>*       fnPtr;<br>&#125; JNINativeMethod;<br></code></pre></td></tr></table></figure>
+
+<p>分别是 Java 层 JNI 方法的名字，方法签名，和要注册的 C&#x2F;C++ 函数地址。</p>
+<p>在方法签名中，每种 Java 基本类型都有对应的签名字符串，引用类型则为 <code>L[全类型名中的 . 替换为 /];</code>。</p>
+<p>JNI 类型签名如下表：</p>
+<table><thead><tr><th>签名</th><th>Java 类型</th></tr></thead><tbody><tr><td>Z</td><td>boolean</td></tr><tr><td>B</td><td>byte</td></tr><tr><td>C</td><td>char</td></tr><tr><td>S</td><td>short</td></tr><tr><td>I</td><td>int</td></tr><tr><td>J</td><td>long</td></tr><tr><td>F</td><td>float</td></tr><tr><td>D</td><td>double</td></tr><tr><td>L</td><td>引用类型</td></tr><tr><td>[</td><td>数组前缀</td></tr></tbody></table>
+
+<p>示例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">long</span> <span class="hljs-title">f</span> <span class="hljs-params">(<span class="hljs-type">int</span> n, String s, <span class="hljs-type">int</span>[] arr)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<p>签名为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp">(ILjava/lang/String;[I)J<br></code></pre></td></tr></table></figure>
+
+<p>那么前面的代码中的 <code>gMethods</code> 数组，即表明了要把 <code>NativeHandler</code> 中的 <code>getString</code> 注册绑定到 C++ 中的 <code>getString</code> 函数上。</p>
+<ol start="5">
+<li>最后调用 <code>env-&gt;RegisterNatives</code> 函数就可以了，一般情况下，注册成功，那么返回 <code>JNI_OK</code>。</li>
+</ol>
+<p>可以允许在 <code>JNI_OnLoad</code> 中绑定多个 Java 类中的 native 方法，建议不要这样做，会导致难以维护。</p>
+<p>动态注册的好处是，可以只导出 <code>JNI_OnLoad</code>（注册的 C&#x2F;C++ 函数可以进行符号优化，不导出），生成速度更快且更小的代码，且可避免与加载到应用中的其他库发生潜在冲突。</p>
+<h3 id="6-3-类静态方法和类成员方法"><a href="#6-3-类静态方法和类成员方法" class="headerlink" title="6.3 类静态方法和类成员方法"></a>6.3 类静态方法和类成员方法</h3><p>注册 Java 中的静态 JNI 方法和类成员 JNI 方法的区别是，对应的 C&#x2F;C++ 函数的回调参数不同。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">NativeHandler</span> &#123;<br><br>  <span class="hljs-type">static</span> &#123;<br>    System.<span class="hljs-built_in">loadLibrary</span>(<span class="hljs-string">&quot;hello&quot;</span>);<br>  &#125;<br><br>  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> native String <span class="hljs-title">getString</span><span class="hljs-params">()</span></span>;<br><br>  <span class="hljs-function"><span class="hljs-keyword">public</span> native String <span class="hljs-title">getHello</span><span class="hljs-params">()</span></span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>对应的 C++ 函数：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">jstring <span class="hljs-title">getString</span><span class="hljs-params">(JNIEnv *env, jclass nativeHandler)</span> </span>&#123;<br>  <span class="hljs-keyword">return</span> env-&gt;<span class="hljs-built_in">NewStringUTF</span>(<span class="hljs-string">&quot;hello&quot;</span>);<br>&#125;<br><br><span class="hljs-function">jstring <span class="hljs-title">getHello</span><span class="hljs-params">(JNIEnv *env, jobject thiz)</span> </span>&#123;<br>  jclass nativeHandlerClass = env-&gt;<span class="hljs-built_in">GetObjectClass</span>(thiz);<br>  <span class="hljs-keyword">return</span> env-&gt;<span class="hljs-built_in">NewStringUTF</span>(<span class="hljs-string">&quot;hello&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>静态方法传递的是代码 Java 类的 <code>jclass</code>，而类方法传递的是表示 Java <code>this</code> 对象的 <code>jobject</code>，可以使用它来访问对应的 <code>this</code> 对象内的成员变量和相关方法。如果需要访问 <code>jclass</code>，使用 JNI 提供的 <code>GetObjectClass</code> 函数获取。</p>
+<p>在注册工作完成后，就可以从 Java 层调用 JNI 方法，使用 C&#x2F;C++ 语言处理逻辑了。</p>
+<h2 id="7-Java层访问"><a href="#7-Java层访问" class="headerlink" title="7.Java层访问"></a>7.Java层访问</h2><p>在 C&#x2F;C++ 代码中，需要对 Java 层进行访问，最基本的两种访问操作就是读写 Java 类成员和调用 Java 类方法。</p>
+<h3 id="7-1-Java-成员变量访问"><a href="#7-1-Java-成员变量访问" class="headerlink" title="7.1 Java 成员变量访问"></a>7.1 Java 成员变量访问</h3><p>JNI 提供了一系列访问 Java 类的静态成员和对象成员的函数，例如。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">GetStaticIntField</span>();     <br><span class="hljs-built_in">SetStaticIntField</span>();     <br><span class="hljs-built_in">GetStaticObjectField</span>();  <br><span class="hljs-built_in">SetStaticObjectField</span>();  <br><br><span class="hljs-built_in">GetIntField</span>();           <br><span class="hljs-built_in">SetIntField</span>();           <br><span class="hljs-built_in">GetObjectField</span>();        <br><span class="hljs-built_in">SetObjectField</span>();<br></code></pre></td></tr></table></figure>
+
+<p>总结为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cpp">GetStatic&lt;type&gt;<span class="hljs-built_in">Field</span>();    <br>SetStatic&lt;type&gt;<span class="hljs-built_in">Field</span>();    <br>Get&lt;type&gt;<span class="hljs-built_in">Field</span>();          <br>Set&lt;type&gt;<span class="hljs-built_in">Field</span>();<br></code></pre></td></tr></table></figure>
+
+<p>当需要访问静态成员时需要提供一个代表 Java 类型的 <code>jclass</code> 作为参数，访问类对象成员时则需要一个表示 Java 对象的 <code>jobject</code> 作为参数。</p>
+<p>同时两者都需要首先提供目标 Java 类成员的 JNI 类型签名（符合上面的 JNI 签名表规则），用来获取一个不透明的 <code>jfieldID</code> 类型，传递给 JNI 函数，用于找到目标成员，之后才能使用上述 JNI 函数访问 Java 类成员。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">jfieldID <span class="hljs-title">GetStaticFieldID</span><span class="hljs-params">(jclass clazz, <span class="hljs-type">const</span> <span class="hljs-type">char</span>* name, <span class="hljs-type">const</span> <span class="hljs-type">char</span>* sig)</span></span>;<br></code></pre></td></tr></table></figure>
+
+<h3 id="7-2-Java-类方法访问"><a href="#7-2-Java-类方法访问" class="headerlink" title="7.2 Java 类方法访问"></a>7.2 Java 类方法访问</h3><p>JNI 同时也提供了一系列调用 Java 类的静态方法和对象方法的函数，例如：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">CallStaticVoidMethod</span>(); <br><span class="hljs-built_in">CallStaticIntMethod</span>();  <br><span class="hljs-built_in">CallObjectMethod</span>();     <br><br><br><span class="hljs-built_in">CallVoidMethod</span>();       <br><span class="hljs-built_in">CallIntMethod</span>();        <br><span class="hljs-built_in">CallObjectMethod</span>();<br></code></pre></td></tr></table></figure>
+
+<p>总结为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp">env-&gt;CallStatic&lt;type&gt;<span class="hljs-built_in">Method</span>(); <br>env-&gt;Call&lt;type&gt;<span class="hljs-built_in">Method</span>();<br></code></pre></td></tr></table></figure>
+
+<p>当需要调用静态方法时需要提供一个代表 Java 类型的 <code>jclass</code> 作为参数，调用类成员方法时则需要一个表示 Java 对象的 <code>jobject</code> 作为参数。</p>
+<p>同时两者都需要首先提供目标 Java 方法的 JNI 签名（符合上面的 JNI 签名表规则），用来获取一个不透明的 <code>jMethodID</code> 类型，传递给 JNI 函数，用于找到目标方法，之后才能使用上述 JNI 函数调用 Java 类方法。</p>
+<h3 id="7-3-Java-层访问实例"><a href="#7-3-Java-层访问实例" class="headerlink" title="7.3 Java 层访问实例"></a>7.3 Java 层访问实例</h3><p>下面对实际的 Java 类成员和方法进行访问和调用。</p>
+<p>首先定义一个 Java 类，<code>JniCallExample</code>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">JniCallExample</span> &#123;<br>  <span class="hljs-keyword">private</span> <span class="hljs-type">static</span> <span class="hljs-type">int</span> sFlag = <span class="hljs-number">256</span>;<br><br>  <span class="hljs-keyword">private</span> String mData = <span class="hljs-string">&quot;info&quot;</span>;<br><br>  <span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">getData</span><span class="hljs-params">()</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> mData;<br>  &#125;<br><br>  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> boolean <span class="hljs-title">setHello</span><span class="hljs-params">(String hello)</span> </span>&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;hello&quot;</span>.<span class="hljs-built_in">equals</span>(hello);<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><code>JniCallExample</code> 类具有一个静态成员 <code>sFlag</code>，和成员变量 <code>mData</code>，还包含一个 <code>getData</code> 成员方法和一个静态方法。</p>
+<p>那么下面将进行如下操作：</p>
+<ol>
+<li>读取 <code>sFlag</code> 的值并打印；</li>
+<li>改变 <code>mData</code> 的值，然后调用 Java 层的 <code>getData</code> 方法，获得修改后的值；</li>
+<li>调用 Java 层的 <code>sayHello</code> 方法，传递 <code>hello</code> 字符串，获得方法返回值。</li>
+</ol>
+<p>这里需要在 C&#x2F;C++ 代码中打印变量，所以需要使用 NDK 提供的 <code>liblog</code> 库，Android.mk 如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs cpp">LOCAL_PATH := $(call my-dir)<br><br>include $(CLEAR_VARS)<br><br>LOCAL_MODULE    := hello<br>LOCAL_SRC_FILES := hello.cpp<br><br><br>LOCAL_LDLIBS := -llog<br><br>include $(BUILD_SHARED_LIBRARY)<br></code></pre></td></tr></table></figure>
+
+<p>下面开始编写源代码。</p>
+<p>首先在 <code>NativeHandler</code> 类里面，声明 JNI 方法 <code>void testAccessJava(JniCallExample jniCallExample)</code>，用于调用 C&#x2F;C++ 代码来启动测试。</p>
+<p>其中提供一个 <code>JniCallExample</code> 对象，是因为需要访问它的成员值。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">NativeHandler</span> &#123;<br><br>  <span class="hljs-type">static</span> &#123;<br>    System.<span class="hljs-built_in">loadLibrary</span>(<span class="hljs-string">&quot;hello&quot;</span>);<br>  &#125;<br><br>  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> native <span class="hljs-type">void</span> <span class="hljs-title">testAccessJava</span><span class="hljs-params">(JniCallExample jniCallExample)</span></span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>然后在 C++ 代码中定义对应的 JNI 方法的实现函数，并在 <code>JNI_OnLoad</code> 中注册函数。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">static</span> <span class="hljs-type">const</span> <span class="hljs-type">char</span> *CLASS_NAME = <span class="hljs-string">&quot;io/l0neman/jniexample/NativeHandler&quot;</span>;<br><br><span class="hljs-type">static</span> JNINativeMethod gMethods[] = &#123;<br>    &#123;<span class="hljs-string">&quot;testAccessJava&quot;</span>, <span class="hljs-string">&quot;(Lio/l0neman/jniexample/JniCallExample;)V&quot;</span>, (<span class="hljs-type">void</span> *) testAccessJava&#125;,<br>&#125;;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">testAccessJava</span><span class="hljs-params">(JNIEnv *env, jobject nativeHandler)</span> </span>&#123;<br>  <br>&#125;<br><br><span class="hljs-function">JNIEXPORT jint <span class="hljs-title">JNI_OnLoad</span><span class="hljs-params">(JavaVM *vm, <span class="hljs-type">void</span> *reserved)</span> </span>&#123;<br>  JNIEnv *env = <span class="hljs-literal">nullptr</span>;<br>  <span class="hljs-keyword">if</span> (vm-&gt;<span class="hljs-built_in">GetEnv</span>((<span class="hljs-type">void</span> **) &amp;env, JNI_VERSION_1_6) != JNI_OK) &#123;<br>    <span class="hljs-keyword">return</span> JNI_ERR;<br>  &#125;<br><br>  jclass nativeHandlerClass = env-&gt;<span class="hljs-built_in">FindClass</span>(CLASS_NAME);<br>  <span class="hljs-keyword">if</span> (nativeHandlerClass == <span class="hljs-literal">nullptr</span>) &#123;<br>    <span class="hljs-keyword">return</span> JNI_ERR;<br>  &#125;<br><br>  jint methods = <span class="hljs-built_in">sizeof</span>(gMethods) / <span class="hljs-built_in">sizeof</span>(JNINativeMethod);<br>  jint ret = env-&gt;<span class="hljs-built_in">RegisterNatives</span>(nativeHandlerClass, gMethods, methods);<br>  <span class="hljs-keyword">if</span> (ret != JNI_OK) &#123;<br>    <span class="hljs-keyword">return</span> ret;<br>  &#125;<br><br>  <span class="hljs-keyword">return</span> JNI_VERSION_1_6;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>下面填充 <code>testAccessJava</code> 的逻辑：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">static</span> <span class="hljs-type">const</span> <span class="hljs-type">char</span> *TAG = <span class="hljs-string">&quot;TAJ&quot;</span>;<br><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">utilPrintJavaStr</span><span class="hljs-params">(JNIEnv *env, jstring jStr)</span> </span>&#123;<br>  <span class="hljs-type">const</span> <span class="hljs-type">char</span> *mDataCChar = env-&gt;<span class="hljs-built_in">GetStringUTFChars</span>(jStr, <span class="hljs-literal">nullptr</span>);  <br>  <br>  __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;jniCallExample.mData: %s&quot;</span>, mDataCChar);<br>  env-&gt;<span class="hljs-built_in">ReleaseStringUTFChars</span>(jStr, mDataCChar);                    <br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">testAccessJava</span><span class="hljs-params">(JNIEnv *env, jclass nativeHandler, jobject jniCallExample)</span> </span>&#123;<br>  jclass jniCallExampleClass = env-&gt;<span class="hljs-built_in">FindClass</span>(<span class="hljs-string">&quot;io/l0neman/jniexample/JniCallExample&quot;</span>);<br><br>  jfieldID sFlagStaticFieldId = env-&gt;<span class="hljs-built_in">GetStaticFieldID</span>(jniCallExampleClass, <span class="hljs-string">&quot;sFlag&quot;</span>, <span class="hljs-string">&quot;I&quot;</span>);<br>  <br>  jint sFlag = env-&gt;<span class="hljs-built_in">GetStaticIntField</span>(jniCallExampleClass, sFlagStaticFieldId);<br>  __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;JniCallExample.sFlag: %d&quot;</span>, sFlag);<br><br>  jfieldID mDataFieldId = env-&gt;<span class="hljs-built_in">GetFieldID</span>(jniCallExampleClass, <span class="hljs-string">&quot;mData&quot;</span>, <span class="hljs-string">&quot;Ljava/lang/String;&quot;</span>);<br>  <br>  jstring newData = env-&gt;<span class="hljs-built_in">NewStringUTF</span>(<span class="hljs-string">&quot;data&quot;</span>);<br>  <br>  env-&gt;<span class="hljs-built_in">SetObjectField</span>(jniCallExample, mDataFieldId, newData);<br><br>  jmethodID getDataMethodId = env-&gt;<span class="hljs-built_in">GetMethodID</span>(jniCallExampleClass, <span class="hljs-string">&quot;getData&quot;</span>, <span class="hljs-string">&quot;()Ljava/lang/String;&quot;</span>);<br>  <br>  jstring newMData = (jstring) env-&gt;<span class="hljs-built_in">CallObjectMethod</span>(jniCallExample, getDataMethodId);<br>  <span class="hljs-built_in">utilPrintJavaStr</span>(env, newMData);<br><br>  jmethodID setHelloStaticMethodId = env-&gt;<span class="hljs-built_in">GetStaticMethodID</span>(jniCallExampleClass, <span class="hljs-string">&quot;setHello&quot;</span>, <span class="hljs-string">&quot;(Ljava/lang/String;)Z&quot;</span>);<br>  <br>  jstring helloParam = env-&gt;<span class="hljs-built_in">NewStringUTF</span>(<span class="hljs-string">&quot;hello&quot;</span>);<br>  <br>  jboolean isSetHello = (jboolean) env-&gt;<span class="hljs-built_in">CallStaticBooleanMethod</span>(jniCallExampleClass, setHelloStaticMethodId, helloParam);<br>  __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;isSetHello %d&quot;</span>, isSetHello);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>打印出如下结果：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp">JniCallExample.sFlag: <span class="hljs-number">256</span><br>jniCallExample.mData: data<br>isSetHello <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p>其中注释 <code>Java: xxx</code> 表示与 Java 代码有相同作用。</p>
+<p>其中包含一部分对于字符串的操作：</p>
+<p><code>env-&gt;NewStringUTF(&quot;data&quot;)</code> 用于创建一个 Java 字符串（new String()），它的内存由 Java 虚拟机管理，它使用 <code>jstring</code> 类型来描述，是一个 JNI 提供的不透明类型，用于映射一个 Java 字符串。每种 Java 类型都有对应的映射类型（下面会提供映射表），这里用作 Java 变量来给 Java 变量赋值或者作为参数传递。</p>
+<p><code>env-&gt;GetStringUTFChars(jStr, nullptr);</code> 用于从 Java 字符串中取得 C 形式的 Modified_UTF-8（下文介绍）字符串，它将会在 native 层分配内存，而不是由 Java 虚拟机管理，所以使用后需要手动使用 <code>ReleaseStringUTFChars</code> 释放。</p>
+<h3 id="7-4-访问优化"><a href="#7-4-访问优化" class="headerlink" title="7.4 访问优化"></a>7.4 访问优化</h3><p>在对 Java 层进行访问时，不管是访问 Java 类成员还是调用 Java 方法，都需要首先使用 <code>FindClass</code> 找到目标 Java 类，然后获取对应的成员 ID 和方法 ID， 对于 <code>FindClass</code> 和查找相关 ID 的函数，每次调用它们可能都需要进行多次的字符串比较，而使用这些 ID 去访问对于的 Java 类成员和方法速度却是很快的。</p>
+<p>那么如果需要多次访问相同的 Java 目标，那么考虑将这些 <code>jclass</code>（FindClass 的结果）和相关 ID 缓存起来。 这些变量在被访问的 Java 类被卸载之前保证是有效的。只有在与 ClassLoader 关联的所有类都满足垃圾回收条件时，系统才会卸载这些类，这种情况比较少见，但在 Android 中是有可能出现的。</p>
+<p>Android 推荐的方法是，在 Java 类中声明一个名叫 <code>nativeInit</code> 的 JNI 方法，在类的静态块内调用，这个 JNI 方法就负责提前缓存要使用的 Java 类型，那么一个类被加载时，<code>nativeInit</code> 就会被调用。</p>
+<p>可以在 Android 系统源码中看到许多名叫 <code>nativeInit</code> 的 JNI 方法，它们就是负责此用途的。</p>
+<p>一般使用 <code>static</code> 结构来缓存这些 ID 和 <code>jclass</code>，<code>jclass</code> 作为 Java 引用，需要使用 <code>NewGlobalRef</code> 函数创建一个全局引用来保护它不被回收。</p>
+<p>那么现在改进之前的 Java 访问实例，如下：</p>
+<p>首先在 <code>NativeHandler</code> 中增加 <code>nativeInit</code> 方法。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">NativeHandler</span> &#123;<br><br>  <span class="hljs-type">static</span> &#123;<br>    System.<span class="hljs-built_in">loadLibrary</span>(<span class="hljs-string">&quot;hello&quot;</span>);<br>    <span class="hljs-built_in">nativeInit</span>();<br>  &#125;<br>  <br>  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> native <span class="hljs-type">void</span> <span class="hljs-title">nativeInit</span><span class="hljs-params">()</span></span>;<br><br>  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> native <span class="hljs-type">void</span> <span class="hljs-title">testAccessJava</span><span class="hljs-params">(JniCallExample jniCallExample)</span></span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>然后是源代码，注册部分只修改 <code>JNINativeMethod</code> 数组即可：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">static</span> JNINativeMethod gMethods[] = &#123;<br>    &#123;<span class="hljs-string">&quot;testAccessJava&quot;</span>, <span class="hljs-string">&quot;(Lio/l0neman/jniexample/JniCallExample;)V&quot;</span>, (<span class="hljs-type">void</span> *) testAccessJava&#125;,<br>    &#123;<span class="hljs-string">&quot;nativeInit&quot;</span>,     <span class="hljs-string">&quot;()V&quot;</span>,                                       (<span class="hljs-type">void</span> *) nativeInit&#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>然后是 <code>nativeInit</code> 的逻辑和修改过的 <code>testAccessJava</code> 函数的实现。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">JniCallExampleHolder</span> &#123;<br>    jclass jniCallExampleClass;<br>    jfieldID sFlagStaticFieldId;<br>    jfieldID mDataFieldId;<br>    jmethodID getDataMethodId;<br>    jmethodID setHelloStaticMethodId;<br>&#125;;<br><br><span class="hljs-type">static</span> JniCallExampleHolder gJniCallExampleHolder;<br><br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">nativeInit</span><span class="hljs-params">(JNIEnv *env, jclass clazz)</span> </span>&#123;<br>  jclass jniCallExampleClass = env-&gt;<span class="hljs-built_in">FindClass</span>(<span class="hljs-string">&quot;io/l0neman/jniexample/JniCallExample&quot;</span>);<br>  gJniCallExampleHolder.jniCallExampleClass = (jclass) env-&gt;<span class="hljs-built_in">NewGlobalRef</span>(jniCallExampleClass);   <br>  gJniCallExampleHolder.sFlagStaticFieldId = env-&gt;<span class="hljs-built_in">GetStaticFieldID</span>(jniCallExampleClass, <span class="hljs-string">&quot;sFlag&quot;</span>, <span class="hljs-string">&quot;I&quot;</span>);;<br>  gJniCallExampleHolder.mDataFieldId = env-&gt;<span class="hljs-built_in">GetFieldID</span>(jniCallExampleClass, <span class="hljs-string">&quot;mData&quot;</span>, <span class="hljs-string">&quot;Ljava/lang/String;&quot;</span>);<br>  gJniCallExampleHolder.getDataMethodId = env-&gt;<span class="hljs-built_in">GetMethodID</span>(jniCallExampleClass, <span class="hljs-string">&quot;getData&quot;</span>, <span class="hljs-string">&quot;()Ljava/lang/String;&quot;</span>);;<br>  gJniCallExampleHolder.setHelloStaticMethodId = env-&gt;<span class="hljs-built_in">GetStaticMethodID</span>(jniCallExampleClass, <span class="hljs-string">&quot;setHello&quot;</span>, <span class="hljs-string">&quot;(Ljava/lang/String;)Z&quot;</span>);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">testAccessJava</span><span class="hljs-params">(JNIEnv *env, jclass nativeHandler, jobject jniCallExample)</span> </span>&#123;<br><br>  <br>  jint sFlag = env-&gt;<span class="hljs-built_in">GetStaticIntField</span>(gJniCallExampleHolder.jniCallExampleClass,<br>                                      gJniCallExampleHolder.sFlagStaticFieldId);<br>  __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;JniCallExample.sFlag: %d&quot;</span>, sFlag);<br><br>  <br>  jstring newData = env-&gt;<span class="hljs-built_in">NewStringUTF</span>(<span class="hljs-string">&quot;data&quot;</span>);<br>  <br>  env-&gt;<span class="hljs-built_in">SetObjectField</span>(jniCallExample, gJniCallExampleHolder.mDataFieldId, newData);<br><br>  <br>  jstring newMData = (jstring) env-&gt;<span class="hljs-built_in">CallObjectMethod</span>(jniCallExample, gJniCallExampleHolder.getDataMethodId);<br>  <span class="hljs-built_in">utilPrintJavaStr</span>(env, newMData);<br><br>  <br>  jstring helloParam = env-&gt;<span class="hljs-built_in">NewStringUTF</span>(<span class="hljs-string">&quot;hello&quot;</span>);<br>  <br>  jboolean isSetHello = (jboolean) env-&gt;<span class="hljs-built_in">CallStaticBooleanMethod</span>(gJniCallExampleHolder.jniCallExampleClass,<br>                                                                gJniCallExampleHolder.setHelloStaticMethodId,<br>                                                                helloParam);<br>  __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;isSetHello %d&quot;</span>, isSetHello);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>其中有一个地方使用了 <code>env-&gt;NewGlobalRef</code> 建立了一个全局引用，它会保护这个 <code>jclass</code> 不会在 JNI 函数执行完之后被回收，注意需要在不使用的时候使用 <code>env-&gt;DeleteGlobalRef</code> 释放引用，例如 <code>JNI_OnUnload</code> 中。</p>
+<h3 id="7-5-JNI-类型"><a href="#7-5-JNI-类型" class="headerlink" title="7.5 JNI 类型"></a>7.5 JNI 类型</h3><p>每种 Java 类型在 JNI 中都有对应的本地数据类型，C&#x2F;C++ 通过 JNI 方法与 Java 层进行交互时，均是使用这些类型进行参数传递，此时虚拟机再根据每种类型翻译为相应的 Java 类型传递给 Java 层方法.</p>
+<p>还有一些特殊的数据类型用来存储 Java 方法 ID 和类成员 ID。</p>
+<h4 id="7-5-1-基本数据类型"><a href="#7-5-1-基本数据类型" class="headerlink" title="7.5.1 基本数据类型"></a>7.5.1 基本数据类型</h4><table><thead><tr><th>Java 类型</th><th>本地类型</th><th>说明</th></tr></thead><tbody><tr><td>boolean</td><td>jboolean</td><td>unsigned 8 bits</td></tr><tr><td>byte</td><td>jbyte</td><td>signed 8 bits</td></tr><tr><td>char</td><td>jchar</td><td>signed 16 bits</td></tr><tr><td>short</td><td>jshort</td><td>signed 16 bits</td></tr><tr><td>int</td><td>jint</td><td>signed 32 bits</td></tr><tr><td>long</td><td>jlong</td><td>signed 64 bits</td></tr><tr><td>float</td><td>jfloat</td><td>32 bits</td></tr><tr><td>double</td><td>jdouble</td><td>64 bits</td></tr><tr><td>void</td><td>void</td><td>无</td></tr></tbody></table>
+
+<p><code>jboolean</code> 的两种取值：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">define</span> JNI_FALSE  0 </span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> JNI_TRUE   1</span><br></code></pre></td></tr></table></figure>
+
+<p><code>jsize</code> 类型用于描述数组大小或者索引。</p>
+<p>从 <code>jni.h</code> 中看它们和真实 C&#x2F;C++ 数据类型的对应关系：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">typedef</span> <span class="hljs-type">uint8_t</span>  jboolean; <br><span class="hljs-keyword">typedef</span> <span class="hljs-type">int8_t</span>   jbyte;    <br><span class="hljs-keyword">typedef</span> <span class="hljs-type">uint16_t</span> jchar;    <br><span class="hljs-keyword">typedef</span> <span class="hljs-type">int16_t</span>  jshort;   <br><span class="hljs-keyword">typedef</span> <span class="hljs-type">int32_t</span>  jint;     <br><span class="hljs-keyword">typedef</span> <span class="hljs-type">int64_t</span>  jlong;    <br><span class="hljs-keyword">typedef</span> <span class="hljs-type">float</span>    jfloat;   <br><span class="hljs-keyword">typedef</span> <span class="hljs-type">double</span>   jdouble;  <br><br><br><span class="hljs-keyword">typedef</span> jint     jsize;<br></code></pre></td></tr></table></figure>
+
+<h4 id="7-5-2-引用类型"><a href="#7-5-2-引用类型" class="headerlink" title="7.5.2 引用类型"></a>7.5.2 引用类型</h4><p>在 C++ 中，Java 引用类型使用一些类表示，它们的继承关系如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">jobject</span>                     (所有 Java 对象)<br> |<br> +-- <span class="hljs-built_in">jclass</span>                (java.lang.Class 对象)<br> +-- <span class="hljs-built_in">jstring</span>               (java.lang.String 对象)<br> +-- <span class="hljs-built_in">jarray</span>                (数组)<br> |    |<br> |    +-- <span class="hljs-built_in">jobjectArray</span>     (object 数组)<br> |    +-- <span class="hljs-built_in">jbooleanArray</span>    (boolean 数组)<br> |    +-- <span class="hljs-built_in">jbyteArray</span>       (byte 数组)<br> |    +-- <span class="hljs-built_in">jcharArray</span>       (<span class="hljs-type">char</span> 数组)<br> |    +-- <span class="hljs-built_in">jshortArray</span>      (<span class="hljs-type">short</span> 数组)<br> |    +-- <span class="hljs-built_in">jintArray</span>        (<span class="hljs-type">int</span> 数组)<br> |    +-- <span class="hljs-built_in">jlongArray</span>       (<span class="hljs-type">long</span> 数组)<br> |    +-- <span class="hljs-built_in">jfloatArray</span>      (<span class="hljs-type">float</span> 数组)<br> |    +-- <span class="hljs-built_in">jdoubleArray</span>     (<span class="hljs-type">double</span> 数组)<br> |<br> +- <span class="hljs-built_in">jthrowable</span>             (java.lang.Throwable 对象)<br></code></pre></td></tr></table></figure>
+
+<p>源码中定义如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jobject</span> &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jclass</span> : <span class="hljs-keyword">public</span> _jobject &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jstring</span> : <span class="hljs-keyword">public</span> _jobject &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jarray</span> : <span class="hljs-keyword">public</span> _jobject &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jobjectArray</span> : <span class="hljs-keyword">public</span> _jarray &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jbooleanArray</span> : <span class="hljs-keyword">public</span> _jarray &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jbyteArray</span> : <span class="hljs-keyword">public</span> _jarray &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jcharArray</span> : <span class="hljs-keyword">public</span> _jarray &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jshortArray</span> : <span class="hljs-keyword">public</span> _jarray &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jintArray</span> : <span class="hljs-keyword">public</span> _jarray &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jlongArray</span> : <span class="hljs-keyword">public</span> _jarray &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jfloatArray</span> : <span class="hljs-keyword">public</span> _jarray &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jdoubleArray</span> : <span class="hljs-keyword">public</span> _jarray &#123;&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">_jthrowable</span> : <span class="hljs-keyword">public</span> _jobject &#123;&#125;;<br><br><span class="hljs-keyword">typedef</span> _jobject*       jobject;<br><span class="hljs-keyword">typedef</span> _jclass*        jclass;<br><span class="hljs-keyword">typedef</span> _jstring*       jstring;<br><span class="hljs-keyword">typedef</span> _jarray*        jarray;<br><span class="hljs-keyword">typedef</span> _jobjectArray*  jobjectArray;<br><span class="hljs-keyword">typedef</span> _jbooleanArray* jbooleanArray;<br><span class="hljs-keyword">typedef</span> _jbyteArray*    jbyteArray;<br><span class="hljs-keyword">typedef</span> _jcharArray*    jcharArray;<br><span class="hljs-keyword">typedef</span> _jshortArray*   jshortArray;<br><span class="hljs-keyword">typedef</span> _jintArray*     jintArray;<br><span class="hljs-keyword">typedef</span> _jlongArray*    jlongArray;<br><span class="hljs-keyword">typedef</span> _jfloatArray*   jfloatArray;<br><span class="hljs-keyword">typedef</span> _jdoubleArray*  jdoubleArray;<br><span class="hljs-keyword">typedef</span> _jthrowable*    jthrowable;<br><span class="hljs-keyword">typedef</span> _jobject*       jweak;<br></code></pre></td></tr></table></figure>
+
+<p>在 C 语言中，所有 JNI 引用类型都与 jobject 的定义相同。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">typedef</span> <span class="hljs-type">void</span>*           jobject;<br><span class="hljs-keyword">typedef</span> jobject         jclass;<br><span class="hljs-keyword">typedef</span> jobject         jstring;<br><span class="hljs-keyword">typedef</span> jobject         jarray;<br><span class="hljs-keyword">typedef</span> jarray          jobjectArray;<br><span class="hljs-keyword">typedef</span> jarray          jbooleanArray;<br><span class="hljs-keyword">typedef</span> jarray          jbyteArray;<br><span class="hljs-keyword">typedef</span> jarray          jcharArray;<br><span class="hljs-keyword">typedef</span> jarray          jshortArray;<br><span class="hljs-keyword">typedef</span> jarray          jintArray;<br><span class="hljs-keyword">typedef</span> jarray          jlongArray;<br><span class="hljs-keyword">typedef</span> jarray          jfloatArray;<br><span class="hljs-keyword">typedef</span> jarray          jdoubleArray;<br><span class="hljs-keyword">typedef</span> jobject         jthrowable;<br><span class="hljs-keyword">typedef</span> jobject         jweak;<br></code></pre></td></tr></table></figure>
+
+<h4 id="7-5-3-方法和类成员-ID"><a href="#7-5-3-方法和类成员-ID" class="headerlink" title="7.5.3 方法和类成员 ID"></a>7.5.3 方法和类成员 ID</h4><p>它们是不透明结构体指针类型：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">_jfieldID</span>;<br><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">_jfieldID</span> *jfieldID;<br> <br><span class="hljs-keyword">struct</span> <span class="hljs-title class_">_jmethodID</span>;<br><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">_jmethodID</span> *jmethodID;<br></code></pre></td></tr></table></figure>
+
+<h4 id="7-5-4-数组元素"><a href="#7-5-4-数组元素" class="headerlink" title="7.5.4 数组元素"></a>7.5.4 数组元素</h4><p><code>jvalue</code> 用于作为参数数组中的元素类型：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">typedef</span> <span class="hljs-keyword">union</span> <span class="hljs-title class_">jvalue</span> &#123;<br>    jboolean    z;<br>    jbyte       b;<br>    jchar       c;<br>    jshort      s;<br>    jint        i;<br>    jlong       j;<br>    jfloat      f;<br>    jdouble     d;<br>    jobject     l;<br>&#125; jvalue;<br></code></pre></td></tr></table></figure>
+
+<h3 id="7-6-引用管理"><a href="#7-6-引用管理" class="headerlink" title="7.6 引用管理"></a>7.6 引用管理</h3><p>Java 对象在 JNI 中有两种引用方式，一种是局部引用；一种是全局引用。</p>
+<h4 id="7-6-1-局部引用"><a href="#7-6-1-局部引用" class="headerlink" title="7.6.1 局部引用"></a>7.6.1 局部引用</h4><p>Java 层通过 JNI 方法传递给 C&#x2F;C++ 函数的每个对象参数，以及 C&#x2F;C++ 通过 JNI 函数（<code>Call&lt;type&gt;Method</code>）调用接收的 Java 方法的对象返回值都属于局部引用。</p>
+<p>局部引用仅在当前线程中的当前 C&#x2F;C++ 函数运行期间有效。在 C&#x2F;C++ 函数返回后，即使对象本身继续存在，该引用也无效。</p>
+<p>局部引用适用于 <code>jobject</code> 的所有子类，包括 <code>jclass</code>、<code>jstring</code> 和 <code>jarray</code>。</p>
+<h4 id="7-6-2-全局引用"><a href="#7-6-2-全局引用" class="headerlink" title="7.6.2 全局引用"></a>7.6.2 全局引用</h4><p>创建全局引用只能使用 <code>NewGlobalRef</code> 和 <code>NewWeakGlobalRef</code> 函数。</p>
+<p>如果希望长时间的持有某个引用，那么必须使用全局引用，使用 <code>NewGlobalRef</code> 函数时将局部引用作为参数传入，换取全局引用。在调用 <code>DeleteGlobalRef</code> 删除全局引用之前，此引用保证有效。</p>
+<p>通常用于缓存 <code>FindClass</code> 返回的 <code>jclass</code>，就像前面的 Java 访问优化中所做的措施一样。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp">jclass localClass = env-&gt;<span class="hljs-built_in">FindClass</span>(<span class="hljs-string">&quot;MyClass&quot;</span>);<br>jclass globalClass = <span class="hljs-built_in">reinterpret_cast</span>&lt;jclass&gt;(env-&gt;<span class="hljs-built_in">NewGlobalRef</span>(localClass));<br></code></pre></td></tr></table></figure>
+
+<h4 id="7-6-3-提示"><a href="#7-6-3-提示" class="headerlink" title="7.6.3 提示"></a>7.6.3 提示</h4><p>对于同一个对象的引用可能存在多个不同的值，例如，对于同一个对象多次调用 <code>NewGlobalRef</code> 所返回的值可能不同。</p>
+<p>如果需要比较两个引用是否指向同一个对象，必须使用 <code>IsSameObject</code> 函数，切勿在 C&#x2F;C++ 代码中使用 <code>==</code> 比较各个引用。</p>
+<p>在两次调用 <code>NewGlobalRef</code> 对同一个对象创建全局引用时，表示这个对象的 32 位值可能不同；而在多次调用 <code>NewGlobalRef</code> 创建不同对象的全局引用时，它们可能具有相同的 32 位值，所以不能将 <code>jobject</code> 用作 key 使用。</p>
+<p>不要过度分配局部引用，如果需要创建大量引用，应该主动调用 <code>DeleteLocalRef</code> 删除它们，而不是期望 JNI 自动删除。JNI 默认实现只能保留 16 个局部引用，如果需要保存更多数量，可以按照需要删除，或使用 <code>EnsureLocalCapacity/PushLocalFrame</code> 申请保留更多引用数量。</p>
+<p><code>jfieldID</code> 和 <code>jmethodID</code> 为不透明类型，不属于对象引用，所以不能使用 <code>NewGlobalRef</code> 保护。<code>GetStringUTFChars</code> 和 <code>GetByteArrayElements</code> 返回的原始数据指针也不属于对象。</p>
+<p>一种特殊情况是，如果使用 <code>AttachCurrentThread</code> 附加到 C&#x2F;C++ 线程，那么在线程分离之前，运行中的代码一定不会自动释放局部引用。代码创建的任何局部引用都必须手动删除。通常，在循环中创建局部引用的任何 C&#x2F;C++ 代码需要执行某些手动删除操作。</p>
+<p>谨慎使用全局引用。全局引用不可避免，但它们很难调试，并且可能会导致难以诊断的内存（不良）行为。在所有其他条件相同的情况下，全局引用越少，解决方案的效果可能越好。</p>
+<p>对 Java 字符串和数组的访问方法。访问这些数据是 JNI 开发的基础。</p>
+<h2 id="8-java常用数据访问"><a href="#8-java常用数据访问" class="headerlink" title="8. java常用数据访问"></a>8. java常用数据访问</h2><h3 id="8-1-访问字符串"><a href="#8-1-访问字符串" class="headerlink" title="8.1 访问字符串"></a>8.1 访问字符串</h3><p>访问字符串有如下两种情况：</p>
+<ol>
+<li>Java 层调用 JNI 方法，String 对象以 <code>jstring</code> 的形式传入 JNI 方法，此时 C&#x2F;C++ 语言接收使用；</li>
+<li>C&#x2F;C++ 产生字符串数据，返回给 Java 层使用。</li>
+</ol>
+<p>代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">final</span> String hello = NativeHandler.<span class="hljs-built_in">testAccessString</span>(<span class="hljs-string">&quot;hello&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function">jstring <span class="hljs-title">testAccessString</span><span class="hljs-params">(JNIEnv *env, jclass clazz, jstring hello)</span> </span>&#123;<br>  <span class="hljs-type">const</span> <span class="hljs-type">char</span> *stringChars = env-&gt;<span class="hljs-built_in">GetStringUTFChars</span>(hello, <span class="hljs-literal">nullptr</span>);  <br>  __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;java string: %s&quot;</span>, stringChars);<br>  env-&gt;<span class="hljs-built_in">ReleaseStringUTFChars</span>(hello, stringChars);                    <br><br>  <span class="hljs-keyword">return</span> env-&gt;<span class="hljs-built_in">NewStringUTF</span>(<span class="hljs-string">&quot;result&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="8-1-1-获取字符串"><a href="#8-1-1-获取字符串" class="headerlink" title="8.1.1 获取字符串"></a>8.1.1 获取字符串</h4><p><code>GetStringUTFChars</code> 将返回 C&#x2F;C++ 语言可以直接使用的 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/types.html#wp16542">Modified_UTF-8</a> 格式字符串（Modified_UTF-8 格式是 JNI 提供的优化后的 UTF-8 格式字符串，优化后的编码对 C 代码友好，因为它将 <code>\u0000</code> 编码为 <code>0xc0 0x80</code>，而不是 <code>0x00</code>。这样做的好处是，可以依靠以 <code>\0</code> 终止的 C 样式字符串，非常适合与标准 libc 字符串函数配合使用。但缺点是，无法将任意 UTF-8 的数据传递给 JNI 函数）。</p>
+<p>在使用 <code>GetStringUTFChars</code> 获取字符串后，JavaVM 为字符串在 native 层分配了内存，在字符串使用完毕后，必须使用 <code>ReleaseStringUTFChars</code> 释放内存，否则将会造成内存泄漏。</p>
+<p>从 C&#x2F;C++ 获取 Java 字符串的长度有两种方式，可直接使用 <code>GetStringUTFLength</code> 对 <code>jstring</code> 计算长度：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp">jstring hello;<br>jsize utfLength = env-&gt;<span class="hljs-built_in">GetStringUTFLength</span>(hello);<br></code></pre></td></tr></table></figure>
+
+<p>或者使用 C&#x2F;C++ 的 <code>strlen</code> 计算：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">const</span> <span class="hljs-type">char</span> *stringChars = env-&gt;<span class="hljs-built_in">GetStringUTFChars</span>(hello, <span class="hljs-literal">nullptr</span>);<br><span class="hljs-type">size_t</span> utfLength = <span class="hljs-built_in">strlen</span>(stringChars);<br></code></pre></td></tr></table></figure>
+
+<p><code>GetStringUTFChars</code> 函数的第 2 个参数是一个 <code>jboolean</code> 类型的指针，表示关心是否创建了字符串的副本，如果创建了字符串的副本它会返回 <code>JNI_TRUE</code>，否则为 <code>JNI_FALSE</code>，不管是否创建，都需要 Release 操作，所以一般不会关心它的结果，传递 <code>nullptr</code> 即可（C 语言传递 <code>NULL</code>）。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp">jboolean isCopy;<br><span class="hljs-type">const</span> <span class="hljs-type">char</span> *stringChars = env-&gt;<span class="hljs-built_in">GetStringUTFChars</span>(hello,);  <br><span class="hljs-keyword">if</span> (isCopy == JNI_TRUE) &#123;<br>  <br>&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (isCopy == JNI_FALSE) &#123;<br>  <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="8-1-2-提示"><a href="#8-1-2-提示" class="headerlink" title="8.1.2 提示"></a>8.1.2 提示</h4><p>JNI 还提供了 <code>GetStringChars</code> 函数，它返回的是 UTF-16 字符串，使用 UTF-16 字符串执行操作通常会更快，但是 UTF-16 字符串不是以零终止的，并且允许使用 <code>\u0000</code>，因此需要保留字符串长度和返回的 <code>jchar</code> 指针。</p>
+<p>一般的开发中几乎都使用 <code>GetStringUTFChars</code> 获取字符串。</p>
+<h4 id="8-1-3-返回字符串"><a href="#8-1-3-返回字符串" class="headerlink" title="8.1.3 返回字符串"></a>8.1.3 返回字符串</h4><p>如果需要返回给 Java 层字符串，使用 <code>env-&gt;NewStringUTF(&quot;result&quot;)</code> 即可，JavaVM 将会基于 C 字符串创建一个新的 <code>String</code> 的对象，它的内存由虚拟机管理。</p>
+<p>注意传递给 <code>NewStringUTF</code> 的数据必须采用 Modified_UTF-8 格式。一种常见的错误是从文件或网络数据流中读取字符数据，在未过滤的情况下将其传递给 <code>NewStringUTF</code>。除非确定数据是有效的 Modified_UTF-8 格式（或 7 位 ASCII，这是一个兼容子集），否则需要剔除无效字符或将它们转换为适当的 Modified_UTF-8 格式。如果不这样做，UTF-16 转换可能会产生意外的结果（Java 语言使用的是 UTF-16）。默认状态下 CheckJNI 会为模拟器启用，它会扫描并在收到无效字符串输入时中止虚拟机。</p>
+<h3 id="8-2-访问数组"><a href="#8-2-访问数组" class="headerlink" title="8.2 访问数组"></a>8.2 访问数组</h3><p>和访问 Java 成员类似，JNI 提供了一系列访问数组的函数：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-built_in">GetIntArrayElements</span>();<br><span class="hljs-built_in">GetBooleanArrayElements</span>();<br><span class="hljs-built_in">GetDoubleArrayElements</span>();<br></code></pre></td></tr></table></figure>
+
+<p>总结为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp">Get&lt;type&gt;<span class="hljs-built_in">ArrayElements</span>();<br></code></pre></td></tr></table></figure>
+
+<p>其中 <code>&lt;type&gt;</code> 中只能是 Java 的基本类型，不包含 <code>String</code> 以及其他引用类型。</p>
+<p>下面分别使用 C&#x2F;C++ 获取 Java 传递的 <code>int</code> 类型和 <code>String</code> 的数组，作为获取 Java 基本类型和引用类型数组的典型示例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">int</span>[] array0 = &#123;<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>&#125;;<br>String[] array1 = &#123;<span class="hljs-string">&quot;a&quot;</span>, <span class="hljs-string">&quot;b&quot;</span>, <span class="hljs-string">&quot;c&quot;</span>, <span class="hljs-string">&quot;d&quot;</span>, <span class="hljs-string">&quot;e&quot;</span>&#125;;<br>NativeHandler.<span class="hljs-built_in">testAccessArray</span>(array0, array1);<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">testAccessArray</span><span class="hljs-params">(JNIEnv *env, jclass clazz, jintArray array0, jobjectArray array1)</span> </span>&#123;<br>  <br>  jint *elements0 = env-&gt;<span class="hljs-built_in">GetIntArrayElements</span>(array0, <span class="hljs-literal">nullptr</span>);<br>  <span class="hljs-keyword">if</span>(elements0 != <span class="hljs-literal">nullptr</span>) &#123;<br>    jsize array0Length = env-&gt;<span class="hljs-built_in">GetArrayLength</span>(array0);<br>    <span class="hljs-keyword">for</span> (jint i = <span class="hljs-number">0</span>; i &lt; array0Length; i++) &#123;<br>      __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;array0[%d] = %d&quot;</span>, i, elements0[i]);<br>    &#125;<br><br>    env-&gt;<span class="hljs-built_in">ReleaseIntArrayElements</span>(array0, elements0, <span class="hljs-number">0</span>);<br>  &#125;<br><br>  <br>  jsize array1Length = env-&gt;<span class="hljs-built_in">GetArrayLength</span>(array1);<br>  <span class="hljs-keyword">for</span> (jint i = <span class="hljs-number">0</span>; i &lt; array1Length; i++) &#123;<br>    jstring element = (jstring) env-&gt;<span class="hljs-built_in">GetObjectArrayElement</span>(array1, i);<br>    <span class="hljs-type">const</span> <span class="hljs-type">char</span> *chars = env-&gt;<span class="hljs-built_in">GetStringUTFChars</span>(element, <span class="hljs-literal">nullptr</span>);  <br>    __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;array1[%d] = %s&quot;</span>, i, chars);<br>    env-&gt;<span class="hljs-built_in">ReleaseStringUTFChars</span>(element, chars);                    <br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>输出如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs cpp">array0[<span class="hljs-number">0</span>] = <span class="hljs-number">1</span><br>array0[<span class="hljs-number">1</span>] = <span class="hljs-number">2</span><br>array0[<span class="hljs-number">2</span>] = <span class="hljs-number">3</span><br>array0[<span class="hljs-number">3</span>] = <span class="hljs-number">4</span><br>array0[<span class="hljs-number">4</span>] = <span class="hljs-number">5</span><br>array1[<span class="hljs-number">0</span>] = a<br>array1[<span class="hljs-number">1</span>] = b<br>array1[<span class="hljs-number">2</span>] = c<br>array1[<span class="hljs-number">3</span>] = d<br>array1[<span class="hljs-number">4</span>] = e<br></code></pre></td></tr></table></figure>
+
+<p>代码比较清晰，可以看到基本类型的数组，直接可以使用 <code>Get&lt;type&gt;ArrayElements(...)</code> 获得一个数组的首地址，使用 <code>GetArrayLength</code> 获取数组长度后，即可像 C&#x2F;C++ 原生数组一样使用指针遍历每一个元素。</p>
+<p>在对原生类型的数组访问之后，需要调用 <code>Release&lt;type&gt;ArrayElements</code> 请求释放内存。</p>
+<p>对象数组则没有提供 <code>Get&lt;type&gt;ArrayElements(...)</code> 的方法，但是它提供了获取单个元素的 <code>GetObjectArrayElement</code> 方法，那么也可以使用循环获取每个 <code>jobject</code> 元素，然后转换为原本的类型。</p>
+<p>如果需要更改原生类型的数组元素值，直接修改获取 C&#x2F;C++ 数组元素的值，JNI 将会把值复制回原始数据区中。</p>
+<p>如果需要更改引用类型的数组元素值，JNI 提供了 <code>SetObjectArrayElement</code> 函数，可直接修改原始元素对象。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp">env-&gt;<span class="hljs-built_in">SetObjectArrayElement</span>(array1, <span class="hljs-number">1</span>, env-&gt;<span class="hljs-built_in">NewStringUTF</span>(<span class="hljs-string">&quot;hello&quot;</span>));<br></code></pre></td></tr></table></figure>
+
+<h4 id="8-2-1-提示"><a href="#8-2-1-提示" class="headerlink" title="8.2.1 提示"></a>8.2.1 提示</h4><p>JNI 为了在不限制虚拟机实现的情况下使接口尽可能高效，允许 <code>Get&lt;type&gt;ArrayElements(...)</code> 函数的调用在运行时直接返回指向实际数据元素的指针，或者分配一些内存创建数据的副本。</p>
+<p>在调用 Release 之前，返回的原生数组指针保证可用，如果没有创建数据的副本，那么原生数组将被固定，在虚拟机整理内存碎片时不会调整原生数组的位置，Release 的时候需要进行判空操作，防止在 Get 数组失败时 Release 空指针。</p>
+<p><code>ReleaseIntArrayElements</code> 函数的最后一个函数的 <code>mode</code> 参数有三个，运行时执行的操作取决于返回的指针指向实际数据还是指向数据副本。</p>
+<p><code>mode</code> 以及对应的 Release 行为：</p>
+<ol>
+<li><code>0</code></li>
+</ol>
+<p>实际数据：取消数组元素固定。<br>数据副本：将数据复制回原始数据，释放包含副本的缓冲区。</p>
+<ol start="2">
+<li><code>JNI_COMMIT</code></li>
+</ol>
+<p>实际数据：不执行任何操作。<br>数据副本：将数据复制回原始数据，不释放包含副本的缓冲区。</p>
+<ol start="3">
+<li><code>JNI_ABORT</code></li>
+</ol>
+<p>实际数据：取消数组元素固定，不中止早期的写入数据。<br>数据副本：释放包含相应副本的缓冲区；对该副本所做的任何更改都会丢失。</p>
+<p>通常传递 <code>0</code> 来保持固定和复制数组的行为一致，其他选项可以用来更好地控制内存，需要谨慎传递。</p>
+<p>其中 <code>GetIntArrayElements</code> 的第 2 个参数，它类似于 <code>GetStringUTFChars</code> 的第 2 个参数，也是 <code>isCopy</code>，表示获取数组时是否创建了数据副本。</p>
+<p>通常检查 <code>isCopy</code> 标志的原因有两个：</p>
+<ol>
+<li>了解是否需要在对数组进行更改后使用 <code>JNI_COMMIT</code> 调用 Release 函数，如果需要在对数组进行更改和仅使用数组内容的代码之间切换，则可以跳过释放缓冲区提交（更改数组数据后需要继续访问数组）；</li>
+<li>有效处理 <code>JNI_ABORT</code>，考虑可能需要获取一个数组，然后进行适当修改后，将数组的一部分传递给其他函数使用，最后舍弃对数组的修改。如果知道 JNI 为数组创建了副本，那么就不需要自己创建一个可被修改的副本，如果 JNI 传递的是实际数据的指针，那么就需要自己创建数组的副本。</li>
+</ol>
+<h4 id="8-2-2-注意"><a href="#8-2-2-注意" class="headerlink" title="8.2.2 注意"></a>8.2.2 注意</h4><p>不能认为 <code>*isCopy</code> 为 <code>JNI_FALSE</code> 时就不需要调用 Release，这是一种常见误区。</p>
+<p>如果 JNI 没有分配任何副本缓冲区，返回指向实际数据的指针，那么虚拟机必须固定实际数组的内存，此时垃圾回收器将不能移动内存，造成内存不能释放。</p>
+<p><code>JNI_COMMIT</code> 标记不会释放数组，最终还需要使用其他标记再次调用 Release。</p>
+<h4 id="8-2-3-数组区域调用"><a href="#8-2-3-数组区域调用" class="headerlink" title="8.2.3 数组区域调用"></a>8.2.3 数组区域调用</h4><p>如果只想复制 Java 数组，使用 <code>Get&lt;type&gt;ArrayRegion</code> 更好。</p>
+<p>通常使用 <code>Get&lt;type&gt;ArrayElements</code> 时，如果需要复制数组数据到外部的缓冲区中，代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp">jbyte* data = env-&gt;<span class="hljs-built_in">GetByteArrayElements</span>(array, <span class="hljs-literal">NULL</span>);<br><span class="hljs-keyword">if</span> (data != <span class="hljs-literal">nullptr</span>) &#123;<br>  <span class="hljs-built_in">memcpy</span>(buffer, data, len);<br>  env-&gt;<span class="hljs-built_in">ReleaseByteArrayElements</span>(array, data, JNI_ABORT);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这样会复制数组 <code>len</code> 长度的字节到 <code>buffer</code> 中，然后释放数组内存。其中 Get 调用可能会返回实际数组或者实际数组的副本，取决于运行时的情况，代码复制数据（那么上面的代码可能是第 2 次复制），那么这种情况下，使用 <code>JNI_ABORT</code> 确保不会再出现第 3 次复制。</p>
+<p>使用 <code>Get&lt;type&gt;ArrayRegion</code> 函数不仅可以完成相同操作，而且不必考虑 Release 调用：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp">env-&gt;<span class="hljs-built_in">GetByteArrayRegion</span>(array, <span class="hljs-number">0</span>, len, buffer);<br></code></pre></td></tr></table></figure>
+
+<p>区域调用优点：</p>
+<ol>
+<li>只需要一个 JNI 调用，而不是两个，减少开销；</li>
+<li>不需要固定实际数组或额外复制数据；</li>
+<li>降低风险，不存在操作失败后忘记调用 Release 的风险。</li>
+</ol>
+<p>除此之外，JNI 还提供了针对于字符串的区域调用函数，<code>GetStringUTFRegion</code> 或 <code>GetStringRegion</code> 将字符数据复制到 <code>String</code> 对象之外。</p>
+<h2 id="9-线程"><a href="#9-线程" class="headerlink" title="9. 线程"></a>9. 线程</h2><p>所有线程都是 Linux 线程，由内核调度。线程通常从受虚拟机管理的代码启动（使用 <code>Thread#start()</code> 方法），但也可以在 native 层创建，然后通过 JNI 函数附加到 JavaVM。在 C&#x2F;C++ 代码中例如使用 <code>pthread_create</code> 启动本地线程，然后调用 JNI 提供的 <code>AttachCurrentThread</code> 或 <code>AttachCurrentThreadAsDeamon</code> 函数，在附加之前，这个线程不会包含任何 <code>JNIEnv</code>，所以无法调用 <code>JNI</code>（<code>JNIEnv</code> 指针不能在多个线程中共享，只能分别附加，主线程默认已被附加）。</p>
+<p>被附加成功的本地线程会构建 <code>java.lang.Thread</code> 对象并被添加到 Main ThreadGroup，从而使调试程序能够看到它。在已附加的线程上调用 <code>AttachCurrentThread</code> 属于空操作。</p>
+<p>通过 JNI 附加的线程在退出之前必须调用 <code>DetachCurrentThread</code> 分离附加。如果直接对此进行编写代码会很麻烦，可以使用 <code>pthread_key_create</code> 定义在线程退出之前调用的析构函数，之后再调用 <code>DetachCurrentThread</code>。（将该 key 与 <code>pthread_setspecific</code> 配合使用，以将 <code>JNIEnv</code> 存储在线程本地存储中；这样一来，该 key 将作为参数传递到线程的析构函数中。）</p>
+<h3 id="9-1-附加到本地线程"><a href="#9-1-附加到本地线程" class="headerlink" title="9.1 附加到本地线程"></a>9.1 附加到本地线程</h3><p>下面是一个附加到线程的示例，使用 <code>pthread_create</code> 创建一个线程，并在线程执行代码中附加：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp">NativeHandler.<span class="hljs-built_in">testThread</span>();<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> *<span class="hljs-title">threadTest</span><span class="hljs-params">(<span class="hljs-type">void</span> *arg)</span> </span>&#123;<br>  JNIEnv *env = <span class="hljs-literal">nullptr</span>;<br>  <br>  jint ret = gJavaVM-&gt;<span class="hljs-built_in">GetEnv</span>((<span class="hljs-type">void</span> **) &amp;env, JNI_VERSION_1_6);<br>  <span class="hljs-keyword">switch</span> (ret) &#123;<br>    <span class="hljs-keyword">case</span> JNI_OK:<br>      __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;获得了 JNIEnv.&quot;</span>);<br>      <span class="hljs-keyword">break</span>;<br><br>    <span class="hljs-keyword">case</span> JNI_EDETACHED:<br>      ret = gJavaVM-&gt;<span class="hljs-built_in">AttachCurrentThread</span>(&amp;env, <span class="hljs-literal">nullptr</span>);<br>      <span class="hljs-keyword">if</span> (ret == JNI_OK) &#123;<br>        __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;线程已附加. %ld&quot;</span>, (<span class="hljs-type">long</span>) <span class="hljs-built_in">pthread_getspecific</span>(gKey));<br>      &#125; <span class="hljs-keyword">else</span> &#123;<br>        __android_log_print(ANDROID_LOG_ERROR, TAG, <span class="hljs-string">&quot;线程附加失败，code: %d.&quot;</span>, ret);<br>      &#125;<br>      <span class="hljs-keyword">break</span>;<br><br>    <span class="hljs-keyword">case</span> JNI_EVERSION:<br>      __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;错误 JNI_EVERSION.&quot;</span>);<br>      <span class="hljs-keyword">break</span>;<br><br>    <span class="hljs-keyword">default</span>:<br>      __android_log_print(ANDROID_LOG_ERROR, TAG, <span class="hljs-string">&quot;未知错误：%d&quot;</span>, ret);<br>      <span class="hljs-keyword">break</span>;<br>  &#125;<br><br>  <span class="hljs-keyword">return</span> <span class="hljs-literal">nullptr</span>;<br>&#125;<br><br><br><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">threadDestroy</span><span class="hljs-params">(<span class="hljs-type">void</span> *arg)</span> </span>&#123;<br>  JNIEnv *env = <span class="hljs-literal">nullptr</span>;<br>  jint ret = gJavaVM-&gt;<span class="hljs-built_in">GetEnv</span>((<span class="hljs-type">void</span> **) &amp;env, JNI_VERSION_1_6);<br><br>  <span class="hljs-keyword">if</span> (ret == JNI_OK) &#123;<br>    __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;线程分离.&quot;</span>);<br>    gJavaVM-&gt;<span class="hljs-built_in">DetachCurrentThread</span>();<br>  &#125;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">testThread</span><span class="hljs-params">(JNIEnv *env, jclass clazz)</span> </span>&#123;<br>  <br>  env-&gt;<span class="hljs-built_in">GetJavaVM</span>(&amp;gJavaVM);<br>  <br>  <span class="hljs-built_in">pthread_key_create</span>(&amp;gKey, &amp;threadDestroy);<br>  <br>  <span class="hljs-type">pthread_t</span> tid;<br>  <span class="hljs-type">int</span> ret = <span class="hljs-built_in">pthread_create</span>(&amp;tid, <span class="hljs-literal">nullptr</span>, &amp;threadTest, <span class="hljs-literal">nullptr</span>);<br>  <span class="hljs-keyword">if</span> (ret != <span class="hljs-number">0</span>) &#123;<br>    __android_log_print(ANDROID_LOG_DEBUG, TAG, <span class="hljs-string">&quot;thread [%ld] create err&quot;</span>, tid);<br>    <span class="hljs-keyword">return</span>;<br>  &#125;<br><br>  <br>  <span class="hljs-built_in">pthread_join</span>(tid, <span class="hljs-literal">nullptr</span>);<br>  <br>  <span class="hljs-built_in">pthread_key_delete</span>(gKey);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>上述代码，首先保存 <code>JavaVM</code>，然后启动线程，在线程中使用 <code>GetEnv</code> 函数尝试从线程获得 <code>JNIEnv</code>，返回值将有 3 种结果：</p>
+<ol>
+<li><code>JNI_OK</code>，说明此线程已附加，可直接使用获得的 <code>JNIEnv</code>；</li>
+<li><code>JNI_EDETACHED</code>，说明此线程未附加，那么需要使用 <code>AttachCurrentThread</code> 进行附加；</li>
+<li><code>JNI_EVERSION</code>，说明不支持指定的版本。</li>
+</ol>
+<p>在获得 <code>JNIEnv</code> 之后线程就执行完毕了，那么 <code>pthread_create</code> 中指定的线程析构函数 <code>threadDestroy</code> 将被回调，在这里确认线程已被附加后，使用 <code>DetachCurrentThread</code> 分离线程。</p>
+<p><code>AttachCurrentThread</code> 的第 2 个参数一般可以指定为空，它是一个 <code>JavaVMAttachArgs</code> 结构指针，用于指定格外信息。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">struct</span> <span class="hljs-title class_">JavaVMAttachArgs</span> &#123;<br>    jint        version;    <br>    <span class="hljs-type">const</span> <span class="hljs-type">char</span>* name;       <br>    jobject     group;      <br>&#125;;<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="10-JNI异常"><a href="#10-JNI异常" class="headerlink" title="10. JNI异常"></a>10. JNI异常</h2><p>当原生代码出现异常挂起时，大多数 JNI 函数无法被调用。通过 C&#x2F;C++ 代码可以检查到是否出现了异常（通过 <code>ExceptionCheck</code> 或者 <code>ExceptionOccurred</code> 的返回值）；或者直接清除异常。</p>
+<p>在异常挂起时，只能调用如下 JNI 函数：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs cpp">DeleteGlobalRef<br>DeleteLocalRef<br>DeleteWeakGlobalRef<br>ExceptionCheck<br>ExceptionClear<br>ExceptionDescribe<br>ExceptionOccurred<br>MonitorExit<br>PopLocalFrame<br>PushLocalFrame<br>Release&lt;PrimitiveType&gt;ArrayElements<br>ReleasePrimitiveArrayCritical<br>ReleaseStringChars<br>ReleaseStringCritical<br>ReleaseStringUTFChars<br></code></pre></td></tr></table></figure>
+
+<p>许多 JNI 调用都会抛出异常，但通常可以使用一种更简单的方法来检查失败调用，例如 <code>NewString</code> 函数返回非空，则表示不需要检查异常。如果使用 <code>CallObjectMethod</code> 函数，则始终必须检查异常，如果系统抛出异常，那么函数返回值无效。</p>
+<h3 id="10-1-检查异常"><a href="#10-1-检查异常" class="headerlink" title="10.1 检查异常"></a>10.1 检查异常</h3><p>使用 <code>ExceptionCheck</code> 函数可检查上一次代码调用是否出现了异常，如果出现异常，<code>ExceptionCheck</code> 将返回 <code>JNI_TRUE</code>，否则为 <code>JNI_FALSE</code>；或使用 <code>ExceptionOccurred</code> 函数，如果出现异常，它会返回一个 <code>jthrowable</code> 对象，否则为空。</p>
+<p>通常使用 <code>ExceptionCheck</code> 函数，因为它不需要创建局部引用（<code>jthrowable</code>）。</p>
+<p>在捕获到异常之后，使用 <code>ExceptionDescribe</code> 打印异常信息，如果调用 <code>ExceptionClear</code> 清除异常，那么异常将被忽略（不过在未处理的情况下盲目地忽略异常可能会出现问题）。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">bool</span> <span class="hljs-title">checkException</span><span class="hljs-params">(JNIEnv *env)</span> </span>&#123;<br>  <span class="hljs-keyword">if</span> (env-&gt;<span class="hljs-built_in">ExceptionCheck</span>() == JNI_TRUE) &#123;<br>    env-&gt;<span class="hljs-built_in">ExceptionDescribe</span>();<br>    env-&gt;<span class="hljs-built_in">ExceptionClear</span>();<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>  &#125;<br><br>  <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="10-2-抛出异常"><a href="#10-2-抛出异常" class="headerlink" title="10.2 抛出异常"></a>10.2 抛出异常</h3><p>目前 Android 并不支持 C++ 异常。</p>
+<p>JNI 提供了 <code>Throw</code> 和 <code>ThrowNew</code> 用来抛出 Java 异常，但不会在调用后就抛出异常，只是在当前线程中设置了异常指针。从本地代码返回到受虚拟机管理的代码后，会观察到这些异常指针并进行相应处理（抛出异常）。</p>
+<p>JNI 没有提供直接操作 Java <code>Throwable</code> 对象本身的内置函数（直接创建对象或者获取异常信息）。</p>
+<p>如果想要抛出指定异常，则需要自己找到 <code>Throwable</code> 类后，调用 <code>ThrowNew</code> 函数产生异常：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp">env-&gt;<span class="hljs-built_in">ThrowNew</span>(env-&gt;<span class="hljs-built_in">FindClass</span>(<span class="hljs-string">&quot;java/lang/NullPointerException&quot;</span>), msg);<br><br>env-&gt;<span class="hljs-built_in">ThrowNew</span>(env-&gt;<span class="hljs-built_in">FindClass</span>(env, <span class="hljs-string">&quot;java/lang/RuntimeException&quot;</span>), msg);<br></code></pre></td></tr></table></figure>
+
+<p>如果需要获取异常信息，那么需要查找 <code>Throwable#getMessage()</code> 的方法 ID 并调用。</p>
+<h2 id="11-参考"><a href="#11-参考" class="headerlink" title="11. 参考"></a>11. 参考</h2><ul>
+<li><p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/jniTOC.html">https://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/jniTOC.html</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://developer.android.google.cn/training/articles/perf-jni">https://developer.android.google.cn/training/articles/perf-jni</a></p>
+</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/JNI/" class="print-no-link">#JNI</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Android JNI指南</div>
+      <div>http://crazy965.github.io/2025/01/15/Android-JNI指南/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>crazy965</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年1月15日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/01/15/Android-NDK%E6%8C%87%E5%8D%97/" title="Android NDK指南">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Android NDK指南</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/01/13/Handler%E6%9C%BA%E5%88%B6/" title="Handler机制">
+                        <span class="hidden-mobile">Handler机制</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
